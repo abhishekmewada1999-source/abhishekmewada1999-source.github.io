@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pi Sharpshooter: Stress Buster</title>
-    <!-- Pi Network SDK -->
-    <script src="https://minepi.com"></script>
+    <title>Sharpshooter Arena</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body {
@@ -17,7 +15,6 @@
             display: flex;
             flex-direction: column;
         }
-        /* Top HUD */
         #hud {
             display: flex;
             justify-content: space-between;
@@ -30,14 +27,6 @@
         .stat-box { text-align: center; }
         .stat-label { font-size: 11px; color: #aaa; text-transform: uppercase; }
         .stat-val { font-size: 20px; font-weight: bold; color: #f39c12; }
-        #user-badge {
-            font-size: 12px;
-            background: #6c3483;
-            padding: 5px 10px;
-            border-radius: 15px;
-            border: 1px solid #af7ac5;
-        }
-        /* Game Arena */
         #arena {
             position: relative;
             flex: 1;
@@ -45,7 +34,6 @@
             cursor: crosshair;
             overflow: hidden;
         }
-        /* Targets */
         .target {
             position: absolute;
             width: 70px;
@@ -70,7 +58,6 @@
         @keyframes popIn {
             to { transform: translate(-50%, -50%) scale(1); }
         }
-        /* Floating Text (Headshot / +100) */
         .float-text {
             position: absolute;
             font-weight: 900;
@@ -83,7 +70,6 @@
             0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
             100% { opacity: 0; transform: translate(-50%, -120%) scale(1.3); }
         }
-        /* Menus & Overlays */
         .overlay {
             position: absolute;
             inset: 0;
@@ -112,133 +98,81 @@
             width: 240px;
         }
         .btn:active { transform: scale(0.96); }
-        .btn-pi {
-            background: linear-gradient(45deg, #8e44ad, #5b2c6f);
-            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+        .btn-gold {
+            background: linear-gradient(45deg, #f1c40f, #b7950b);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4);
         }
         .hidden { display: none !important; }
-        /* Golden Gun Mode */
         .golden-mode { box-shadow: inset 0 0 40px rgba(241, 196, 15, 0.5); }
     </style>
 </head>
 <body>
-
-    <!-- Top Scoreboard -->
     <div id="hud">
         <div class="stat-box">
             <div class="stat-label">Score</div>
             <div class="stat-val" id="score">0</div>
         </div>
-        <div id="user-badge">Guest Player</div>
+        <div class="stat-box">
+            <div class="stat-label">Best</div>
+            <div class="stat-val" id="best-score">0</div>
+        </div>
         <div class="stat-box">
             <div class="stat-label">Time</div>
             <div class="stat-val" id="timer">30s</div>
         </div>
     </div>
 
-    <!-- Shooting Arena -->
     <div id="arena"></div>
 
-    <!-- Start Screen -->
     <div id="start-screen" class="overlay">
-        <h1>🎯 PI SHARPSHOOTER</h1>
+        <h1>🎯 SHARPSHOOTER ARENA</h1>
         <p>Center (Yellow) par shoot karke <b>HEADSHOT (2x Points)</b> maarein aur stress bhagayein!</p>
-        <button class="btn btn-pi" onclick="loginWithPi()">🔑 Login with Pi</button>
         <button class="btn" onclick="startGame(false)">🔥 Start Free Match</button>
+        <button class="btn btn-gold" onclick="startGame(true)">⚡ Golden Gun (2x Points)</button>
     </div>
 
-    <!-- Game Over Screen -->
     <div id="gameover-screen" class="overlay hidden">
         <h1 id="result-title">BOOYAH! MATCH OVER</h1>
         <p style="font-size: 20px; color: #fff;">Final Score: <b id="final-score" style="color:#f39c12;">0</b></p>
         <p style="font-size: 14px;">Headshots: <span id="headshot-count">0</span></p>
         <button class="btn" onclick="startGame(false)">🔄 Play Again</button>
-        <button class="btn btn-pi" onclick="buyGoldenSniper()">⚡ Golden Gun (0.01 Pi)</button>
+        <button class="btn btn-gold" onclick="startGame(true)">⚡ Play with Golden Gun</button>
     </div>
 
     <script>
-        // 1. Initialize Pi SDK (Sandbox mode true rakhein testing ke liye)
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true });
-
         let score = 0;
+        let bestScore = localStorage.getItem('sharpshooter_best') || 0;
         let headshots = 0;
         let timeLeft = 30;
         let gameInterval, spawnInterval;
         let isGoldenGun = false;
-        let piUser = null;
 
         const arena = document.getElementById('arena');
         const scoreEl = document.getElementById('score');
+        const bestScoreEl = document.getElementById('best-score');
         const timerEl = document.getElementById('timer');
-        const userBadge = document.getElementById('user-badge');
+        bestScoreEl.innerText = bestScore;
 
-        // Sound Synthesizer (Bina external MP3 file ke gunshot sound banata hai)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let audioCtx = null;
         function playShootSound(isHeadshot) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = isHeadshot ? 'triangle' : 'sawtooth';
-            osc.frequency.setValueAtTime(isHeadshot ? 800 : 250, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.15);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.15);
-        }
-
-        // 2. Pi Authentication Function
-        async function loginWithPi() {
             try {
-                const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                piUser = auth.user;
-                userBadge.innerText = "@" + piUser.username;
-                alert("Swagat hai @" + piUser.username + "! Ab aap Pi rewards ke liye khel sakte hain.");
-            } catch (err) {
-                console.error(err);
-                alert("Pi Browser mein kholein ya Sandbox test karein.");
-            }
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = isHeadshot ? 'triangle' : 'sawtooth';
+                osc.frequency.setValueAtTime(isHeadshot ? 800 : 250, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {}
         }
 
-        function onIncompletePaymentFound(payment) {
-            console.log("Incomplete payment:", payment);
-        }
-
-        // 3. Pi Payment Function (Golden Sniper Unlock)
-        async function buyGoldenSniper() {
-            if (!piUser) {
-                alert("Pehle 'Login with Pi' par click karein!");
-                return;
-            }
-            try {
-                const payment = await Pi.createPayment({
-                    amount: 0.01,
-                    memo: "Unlock Golden Sniper Gun (Double Points)",
-                    metadata: { item: "golden_sniper" }
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        console.log("Ready for approval:", paymentId);
-                        // Demo ke liye seedha start kar rahe hain (Live app mein backend approval lagta hai)
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        console.log("Completed:", txid);
-                        startGame(true);
-                    },
-                    onCancel: function(paymentId) { alert("Payment cancel ho gayi."); },
-                    onError: function(error, payment) { console.error(error); }
-                });
-            } catch (err) {
-                // Agar sandbox backend nahi hai toh demo mode mein unlock kar dein
-                alert("Demo Mode: Golden Sniper Activated!");
-                startGame(true);
-            }
-        }
-
-        // 4. Start Game Logic
         function startGame(golden) {
             isGoldenGun = golden;
             score = 0;
@@ -257,4 +191,70 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('gameover-screen').classList.add('hidden');
 
-            // Timer countdown
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft + "s";
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+
+            spawnInterval = setInterval(spawnTarget, 750);
+            spawnTarget();
+        }
+
+        function spawnTarget() {
+            const target = document.createElement('div');
+            target.className = 'target';
+            const bullseye = document.createElement('div');
+            bullseye.className = 'headshot-zone';
+            target.appendChild(bullseye);
+
+            const maxX = Math.max(100, arena.clientWidth - 80);
+            const maxY = Math.max(100, arena.clientHeight - 80);
+            const randomX = Math.max(40, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(40, Math.floor(Math.random() * maxY));
+
+            target.style.left = randomX + 'px';
+            target.style.top = randomY + 'px';
+
+            target.onmousedown = target.ontouchstart = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const isHeadshot = e.target.classList.contains('headshot-zone');
+                let points = isHeadshot ? 100 : 50;
+                if (isGoldenGun) points *= 2;
+
+                score += points;
+                if (isHeadshot) headshots++;
+                scoreEl.innerText = score;
+
+                playShootSound(isHeadshot);
+                showFloatingText(randomX, randomY, isHeadshot ? `HEADSHOT! +${points}` : `+${points}`, isHeadshot ? '#f1c40f' : '#2ecc71');
+                target.remove();
+            };
+
+            arena.appendChild(target);
+            setTimeout(() => { if (target.parentNode) target.remove(); }, 1400);
+        }
+
+        function showFloatingText(x, y, text, color) {
+            const el = document.createElement('div');
+            el.className = 'float-text';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.color = color;
+            el.innerText = text;
+            arena.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+            arena.innerHTML = "";
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('sharpshooter_best', bestScore);
+                bestScoreEl.innerText = bestScore;
+            }
+            document.getElementById('final-score').innerText = score;
+        
