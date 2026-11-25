@@ -3,181 +3,351 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>3D Sniper Mission</title>
+<title>Sniper 3D Strike</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none}
-body{background:#0b0e14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-#hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(10,12,16,0.95);border-bottom:2px solid #f1c40f;z-index:30}
-.box{text-align:center}
-.l{font-size:9px;color:#aaa;letter-spacing:1px}
-.v{font-size:16px;font-weight:900;color:#f1c40f}
-#world{position:relative;flex:1;width:100%;overflow:hidden;perspective:600px;background:linear-gradient(180deg,#1b263b 0%,#415a77 36%,#5c4d3c 37%,#3e3124 65%,#2b2118 100%);transition:transform 0.25s}
-.zoomed{transform:scale(1.85)}
-#road{position:absolute;top:37%;left:50%;width:180%;height:65%;transform:translateX(-50%) rotateX(72deg);transform-origin:top;background:repeating-linear-gradient(0deg,rgba(255,255,255,0.08) 0 4px,transparent 4px 50px),repeating-linear-gradient(90deg,rgba(0,0,0,0.3) 0 4px,transparent 4px 80px)}
-#bunker1,#bunker2{position:absolute;top:33%;width:90px;height:45px;background:#34495e;border:2px solid #111;border-radius:4px}
-#bunker1{left:12%}#bunker2{right:14%}
-.enemy{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:left 0.6s linear}
-.dist{font-size:9px;background:rgba(0,0,0,0.75);color:#2ecc71;padding:1px 5px;border-radius:4px;margin-bottom:2px;font-weight:bold}
-.hd{width:28px;height:26px;background:#e74c3c;border-radius:50%;border:2px solid #f1c40f;box-shadow:0 0 6px #f1c40f}
-.bd{width:44px;height:52px;background:linear-gradient(#2c3e50,#1a252f);border-radius:10px 10px 3px 3px;border:2px solid #000;margin-top:-2px}
-#scope{position:fixed;inset:0;pointer-events:none;z-index:20;display:none;background:radial-gradient(circle,transparent 32%,#000 35%)}
-#aim{position:fixed;top:50%;left:50%;width:180px;height:180px;transform:translate(-50%,-50%);pointer-events:none;z-index:21}
-#aim::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(231,76,60,0.8)}
-#aim::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(231,76,60,0.8)}
-#dot{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#f1c40f;border-radius:50%;transform:translate(-50%,-50%)}
-#rifle{position:fixed;bottom:-15px;right:6%;width:110px;height:165px;background:linear-gradient(90deg,#1c2833,#34495e,#111);border-radius:10px 10px 0 0;transform:rotate(-14deg);transition:transform 0.08s;pointer-events:none;z-index:18;border:2px solid #000}
-#rifle::before{content:'8X AWM';position:absolute;top:35px;left:28px;font-size:11px;font-weight:bold;color:#f1c40f}
-#rifle::after{content:'';position:absolute;top:-45px;left:45px;width:16px;height:50px;background:#000}
-#flash{position:absolute;top:-80px;left:20px;width:65px;height:65px;background:radial-gradient(#fff,#f1c40f,#e67e22,transparent 70%);border-radius:50%;opacity:0}
-.recoil{transform:rotate(-14deg) translateY(25px) scale(0.95)!important}
-#scBtn{position:fixed;bottom:20px;left:18px;width:66px;height:66px;border-radius:50%;background:#f1c40f;border:3px solid #000;color:#000;font-weight:900;font-size:13px;z-index:28}
-.ft{position:absolute;font-weight:900;font-size:17px;pointer-events:none;animation:up 0.75s forwards;text-shadow:2px 2px 3px #000;z-index:25}
-@keyframes up{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-135%)}}
-.ov{position:fixed;inset:0;background:rgba(10,12,18,0.96);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;z-index:99}
-.btn{background:linear-gradient(45deg,#f1c40f,#e67e22);color:#000;border:none;padding:14px 26px;font-size:17px;font-weight:900;border-radius:8px;margin:7px;width:260px}
+body{background:#090c10;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.8);border-bottom:2px solid #f39c12;z-index:30}
+.b{text-align:center}.l{font-size:9px;color:#aaa}.v{font-size:15px;font-weight:900;color:#f1c40f}
+#hpBar{width:70px;height:8px;background:#333;border-radius:4px;overflow:hidden;margin-top:3px}
+#hpFill{width:100%;height:100%;background:#2ecc71;transition:width 0.2s}
+#viewport{position:fixed;inset:0;overflow:hidden;background:#1a252f;touch-action:none}
+#map{position:absolute;width:220%;height:180%;left:-60%;top:-40%;background:linear-gradient(180deg,#1e3c72 0%,#2a5298 35%,#4a3b2c 36%,#2c2219 100%);transition:transform 0.15s ease-out}
+.tower{position:absolute;background:#2c3e50;border:2px solid #111;box-shadow:inset 0 0 15px #000}
+#t1{left:22%;top:22%;width:90px;height:140px}#t2{left:52%;top:18%;width:120px;height:170px}#t3{left:76%;top:25%;width:85px;height:130px}
+.enemy{position:absolute;width:36px;height:56px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}
+.tag{font-size:9px;background:#e74c3c;color:#fff;padding:1px 4px;border-radius:3px;margin-bottom:2px;font-weight:bold}
+.head{width:18px;height:18px;background:#f1c40f;border-radius:50%;border:2px solid #000}
+.body{width:28px;height:34px;background:#c0392b;border-radius:6px 6px 2px 2px;border:2px solid #000;margin-top:-2px}
+#scopeMask{position:fixed;inset:0;pointer-events:none;z-index:20;display:none;background:radial-gradient(circle,transparent 30%,rgba(0,0,0,0.96) 33%)}
+#cross{position:fixed;top:50%;left:50%;width:160px;height:160px;transform:translate(-50%,-50%);pointer-events:none;z-index:21}
+#cross::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:#e74c3c}
+#cross::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:#e74c3c}
+#centerDot{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#2ecc71;border-radius:50%;transform:translate(-50%,-50%)}
+#fireBtn{position:fixed;bottom:25px;right:22px;width:76px;height:76px;border-radius:50%;background:radial-gradient(#e74c3c,#922b21);border:4px solid #fff;color:#fff;font-weight:900;font-size:15px;z-index:28;box-shadow:0 0 15px #e74c3c}
+#zoomBtn{position:fixed;bottom:25px;left:22px;width:68px;height:68px;border-radius:50%;background:#f1c40f;border:3px solid #000;color:#000;font-weight:900;font-size:13px;z-index:28}
+#killMsg{position:fixed;top:22%;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:#f1c40f;text-shadow:2px 2px 4px #000;z-index:35;pointer-events:none}
+#dmgFlash{position:fixed;inset:0;background:rgba(231,76,60,0.45);pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:29}
+.ov{position:fixed;inset:0;background:rgba(9,12,16,0.96);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;z-index:99}
+.btn{background:linear-gradient(45deg,#f39c12,#d35400);color:#fff;border:none;padding:14px 24px;font-size:16px;font-weight:900;border-radius:8px;margin:6px;width:270px}
 </style>
 </head>
 <body>
 <div id="hud">
-<div class="box"><div class="l">LEVEL</div><div class="v" id="lv">1</div></div>
-<div class="box"><div class="l">SCORE / TARGET</div><div class="v" id="sc">0 / 500</div></div>
-<div class="box"><div class="l">AMMO</div><div class="v" id="am">10</div></div>
-<div class="box"><div class="l">TIME</div><div class="v" id="tm">35s</div></div>
+<div class="b"><div class="l">LEVEL</div><div class="v" id="lv">1</div></div>
+<div class="b"><div class="l">KILLS</div><div class="v" id="kl">0 / 3</div></div>
+<div class="b"><div class="l">COINS</div><div class="v" id="cn">0</div></div>
+<div class="b"><div class="l">HEALTH</div><div id="hpBar"><div id="hpFill"></div></div></div>
 </div>
 
-<div id="world" onclick="missShot()">
-<div id="road"></div>
-<div id="bunker1"></div>
-<div id="bunker2"></div>
+<div id="viewport">
+<div id="map">
+<div class="tower" id="t1"></div>
+<div class="tower" id="t2"></div>
+<div class="tower" id="t3"></div>
+</div>
 </div>
 
-<div id="scope"></div>
-<div id="aim"><div id="dot"></div></div>
-<div id="rifle"><div id="flash"></div></div>
-<button id="scBtn" onclick="toggleZoom()">🔭 8X</button>
+<div id="scopeMask"></div>
+<div id="cross"><div id="centerDot"></div></div>
+<div id="dmgFlash"></div>
+<div id="killMsg"></div>
+
+<button id="zoomBtn" onclick="toggleZoom()">🔭 8X</button>
+<button id="fireBtn" onclick="shoot()">🔥 FIRE</button>
 
 <div id="s1" class="ov">
-<h1 style="color:#f1c40f;font-size:26px;margin-bottom:8px">🎯 3D SNIPER MISSIONS</h1>
-<p style="color:#ccc;margin-bottom:16px;max-width:300px">Door (150m–350m) khade dushmano par <b>8X Scope</b> lagakar <b>Headshot (+200)</b> maarein aur agle Level mein jayein!</p>
-<button class="btn" onclick="startLv(1)">🔥 LEVEL 1: BASE CAMP</button>
-<button class="btn" style="background:#2ecc71" onclick="startLv(2)">⚡ LEVEL 2: LONG RANGE</button>
-<button class="btn" style="background:#e74c3c;color:#fff" onclick="startLv(3)">💀 LEVEL 3: ELITE SNIPER</button>
+<h1 style="color:#f1c40f;font-size:26px;margin-bottom:8px">🎯 SNIPER 3D: ELITE STRIKE</h1>
+<p style="color:#ccc;font-size:13px;margin-bottom:14px;max-width:300px">1. Screen par <b>Ungli Ghumakar (Drag)</b> dushman ko beech ke <b>Green Dot</b> par layein.<br>2. <b>8X Scope</b> lagayein aur <b>FIRE</b> button dabayein!</p>
+<button class="btn" onclick="startLv(1)">▶ START MISSION (LEVEL 1)</button>
+<button class="btn" style="background:#27ae60" onclick="buyGun()">🔫 UPGRADE AWM (100 COINS)</button>
+<p id="gunInfo" style="font-size:12px;color:#f1c40f;margin-top:8px">Current Gun: Kar98k (1x Damage)</p>
 </div>
 
 <div id="s2" class="ov" style="display:none">
-<h1 id="resTitle" style="color:#f1c40f;font-size:28px">MISSION COMPLETE!</h1>
-<p id="resMsg" style="font-size:18px;margin:14px 0;color:#fff">Score: 0</p>
-<button id="nextBtn" class="btn" onclick="nextLevel()">➡️ NEXT LEVEL</button>
-<button class="btn" style="background:#7f8c8d;color:#fff" onclick="startLv(curLv)">🔄 RETRY LEVEL</button>
+<h1 id="endT" style="color:#f1c40f;font-size:28px">MISSION CLEARED!</h1>
+<p id="endM" style="font-size:16px;margin:14px 0;color:#fff">+150 Coins Earned!</p>
+<button id="nxtB" class="btn" onclick="startLv(lv+1)">➡️ NEXT LEVEL</button>
+<button class="btn" style="background:#7f8c8d" onclick="startLv(lv)">🔄 RETRY</button>
+<button class="btn" style="background:#2980b9" onclick="backMenu()">🏠 GUN SHOP & MENU</button>
 </div>
 
 <script>
-var curLv=1,sc=0,goal=500,ammo=10,tm=35,t1,t2,t3,ac=null,zoom=false;
-var levels=[
-{g:500,a:12,t:35,sp:1100,mv:false},
-{g:900,a:14,t:35,sp:950,mv:true},
-{g:1400,a:16,t:40,sp:850,mv:true},
-{g:2000,a:18,t:40,sp:750,mv:true},
-{g:2800,a:20,t:45,sp:650,mv:true}
-];
-function snd(h){
+var lv=1,kills=0,need=3,coins=0,hp=100,gunDmg=1,zoom=false,mx=-30,my=-20,sx=0,sy=0,tSpawn,tEnemyFire,ac=null;
+var vp=document.getElementById('viewport'),mp=document.getElementById('map');
+
+vp.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;});
+vp.addEventListener('touchmove',function(e){
+var dx=(e.touches[0].clientX-sx)*(zoom?0.12:0.25);
+var dy=(e.touches[0].clientY-sy)*(zoom?0.12:0.25);
+sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+mx=Math.max(-60,Math.min(0,mx+dx));
+my=Math.max(-45,Math.min(0,my+dy));
+updMap();
+});
+function updMap(){mp.style.left=mx+'%';mp.style.top=my+'%';mp.style.transform=zoom?'scale(1.8)':'scale(1)';}
+function toggleZoom(){
+zoom=!zoom;
+document.getElementById('scopeMask').style.display=zoom?'block':'none';
+document.getElementById('zoomBtn').innerText=zoom?'❌ EXIT':'🔭 8X';
+updMap();
+}
+function snd(f1,f2){
 try{
 if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();
 if(ac.state==='suspended')ac.resume();
 var o=ac.createOscillator(),g=ac.createGain();
-o.type=h?'triangle':'sawtooth';
-o.frequency.setValueAtTime(h?950:130,ac.currentTime);
-o.frequency.exponentialRampToValueAtTime(20,ac.currentTime+0.18);
-g.gain.setValueAtTime(0.4,ac.currentTime);
-g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.18);
+o.type='sawtooth';o.frequency.setValueAtTime(f1,ac.currentTime);
+o.frequency.exponentialRampToValueAtTime(f2,ac.currentTime+0.18);
+g.gain.setValueAtTime(0.4,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.18);
 o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.18);
 }catch(e){}
 }
-function fireAnim(h){
-var r=document.getElementById('rifle'),f=document.getElementById('flash');
-r.classList.add('recoil');f.style.opacity=1;
-setTimeout(function(){r.classList.remove('recoil');f.style.opacity=0;},85);
-snd(h);
+function msg(t,c){
+var el=document.getElementById('killMsg');el.innerText=t;el.style.color=c;
+setTimeout(function(){el.innerText='';},900);
 }
-function toggleZoom(){
-zoom=!zoom;
-document.getElementById('world').classList.toggle('zoomed',zoom);
-document.getElementById('scope').style.display=zoom?'block':'none';
-document.getElementById('rifle').style.display=zoom?'none':'block';
-document.getElementById('scBtn').innerText=zoom?'❌ EXIT':'🔭 8X';
+function shoot(){
+snd(160,25);
+var cx=window.innerWidth/2,cy=window.innerHeight/2,hit=false;
+document.querySelectorAll('.enemy').forEach(function(en){
+if(hit)return;
+var hr=en.querySelector('.head').getBoundingClientRect();
+var br=en.querySelector('.body').getBoundingClientRect();
+if(cx>=hr.left-12 && cx<=hr.right+12 && cy>=hr.top-12 && cy<=hr.bottom+12){
+hit=true;en.remove();kills++;coins+=50*gunDmg;snd(900,100);msg('🎯 HEADSHOT! +50 COINS','#f1c40f');
+}else if(cx>=br.left-10 && cx<=br.right+10 && cy>=br.top-10 && cy<=br.bottom+10){
+hit=true;en.remove();kills++;coins+=25*gunDmg;msg('💥 ENEMY KILLED! +25 COINS','#2ecc71');
 }
-function missShot(){
-if(ammo<=0)return;
-ammo--;fireAnim(false);updHud();
-if(ammo<=0 && sc<goal)endLv(false);
+});
+if(!hit)msg('MISSED! AIM AT CENTER DOT','#e74c3c');
+updHud();
+if(kills>=need)endGame(true);
 }
 function updHud(){
-document.getElementById('lv').innerText=curLv;
-document.getElementById('sc').innerText=sc+' / '+goal;
-document.getElementById('am').innerText=ammo;
-document.getElementById('tm').innerText=tm+'s';
+document.getElementById('lv').innerText=lv;
+document.getElementById('kl').innerText=kills+' / '+need;
+document.getElementById('cn').innerText=coins;
+document.getElementById('hpFill').style.width=hp+'%';
 }
-function startLv(lv){
-curLv=lv;
-var cfg=levels[Math.min(lv-1,levels.length-1)];
-sc=0;goal=cfg.g;ammo=cfg.a;tm=cfg.t;
-updHud();
+function startLv(l){
+lv=l;kills=0;need=2+l;hp=100;mx=-30;my=-20;updMap();updHud();
 document.getElementById('s1').style.display='none';
 document.getElementById('s2').style.display='none';
-clearInterval(t1);clearInterval(t2);clearInterval(t3);
-t1=setInterval(function(){
-tm--;updHud();
-if(tm<=0)endLv(sc>=goal);
-},1000);
-t2=setInterval(function(){spawnEnemy(cfg.mv);},cfg.sp);
-spawnEnemy(cfg.mv);
+document.querySelectorAll('.enemy').forEach(function(e){e.remove();});
+clearInterval(tSpawn);clearInterval(tEnemyFire);
+tSpawn=setInterval(spawnEn,2200);spawnEn();
+tEnemyFire=setInterval(function(){
+if(document.querySelectorAll('.enemy').length>0){
+hp-=10+lv*2;updHud();
+var df=document.getElementById('dmgFlash');df.style.opacity=1;setTimeout(function(){df.style.opacity=0;},180);
+if(hp<=0)endGame(false);
 }
-function nextLevel(){startLv(curLv+1);}
-function spawnEnemy(canMove){
-var w=document.getElementById('world');
-var e=document.createElement('div'),ds=document.createElement('div'),hd=document.createElement('div'),bd=document.createElement('div');
-e.className='enemy';ds.className='dist';hd.className='hd';bd.className='bd';
-var depth=Math.random();
-var scale=0.45+(depth*0.65);
-var distM=Math.round(350-(depth*250));
-ds.innerText=distM+'m';
-e.style.transform='translate(-50%,-50%) scale('+scale.toFixed(2)+')';
-var x=15+Math.random()*70;
-var y=37+(depth*32);
-e.style.left=x+'%';e.style.top=y+'%';
-e.appendChild(ds);e.appendChild(hd);e.appendChild(bd);
-if(canMove){
-setTimeout(function(){if(e.parentNode)e.style.left=Math.max(12,Math.min(88,x+(Math.random()>0.5?18:-18)))+'%';},200);
+},3500);
 }
-e.onclick=function(ev){
-ev.stopPropagation();
-if(ammo<=0)return;
-ammo--;
-var isH=ev.target.className==='hd';
-fireAnim(isH);
-var pts=isH?(distM>220?250:200):80;
-sc+=pts;updHud();
-var ft=document.createElement('div');ft.className='ft';
-ft.style.left=e.style.left;ft.style.top=e.style.top;
-ft.style.color=isH?'#f1c40f':'#2ecc71';
-ft.innerText=isH?'SNIPER HEADSHOT ('+distM+'m)! +'+pts:'KILL +'+pts;
-w.appendChild(ft);setTimeout(function(){ft.remove();},750);
-e.remove();
-if(sc>=goal)endLv(true);
-else if(ammo<=0)endLv(false);
-};
-w.appendChild(e);
-setTimeout(function(){if(e.parentNode)e.remove();},2200);
+function spawnEn(){
+if(document.querySelectorAll('.enemy').length>=3)return;
+var spots=[{x:26,y:26,d:'250m'},{x:58,y:22,d:'320m'},{x:80,y:29,d:'210m'},{x:40,y:45,d:'140m'},{x:68,y:48,d:'120m'}];
+var s=spots[Math.floor(Math.random()*spots.length)];
+var e=document.createElement('div'),tg=document.createElement('div'),hd=document.createElement('div'),bd=document.createElement('div');
+e.className='enemy';tg.className='tag';tg.innerText='SNIPER '+s.d;hd.className='head';bd.className='body';
+e.style.left=s.x+'%';e.style.top=s.y+'%';
+e.appendChild(tg);e.appendChild(hd);e.appendChild(bd);mp.appendChild(e);
 }
-function endLv(win){
-clearInterval(t1);clearInterval(t2);
+function endGame(win){
+clearInterval(tSpawn);clearInterval(tEnemyFire);
 if(zoom)toggleZoom();
-document.querySelectorAll('.enemy').forEach(function(el){el.remove();});
-document.getElementById('resTitle').innerText=win?'🏆 LEVEL '+curLv+' CLEARED!':'💀 OUT OF AMMO / TIME!';
-document.getElementById('resTitle').style.color=win?'#2ecc71':'#e74c3c';
-document.getElementById('resMsg').innerText='Score: '+sc+' / Target: '+goal;
-document.getElementById('nextBtn').style.display=win?'inline-block':'none';
+document.getElementById('endT').innerText=win?'🏆 LEVEL '+lv+' CLEARED!':'💀 YOU WERE SHOT!';
+document.getElementById('endT').style.color=win?'#2ecc71':'#e74c3c';
+document.getElementById('endM').innerText=win?'Total Coins: '+coins:'Enemy snipers took you down!';
+document.getElementById('nxtB').style.display=win?'inline-block':'none';
 document.getElementById('s2').style.display='flex';
+}
+function backMenu(){<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Sniper 3D Strike</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none}
+body{background:#090c10;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.8);border-bottom:2px solid #f39c12;z-index:30}
+.b{text-align:center}.l{font-size:9px;color:#aaa}.v{font-size:15px;font-weight:900;color:#f1c40f}
+#hpBar{width:70px;height:8px;background:#333;border-radius:4px;overflow:hidden;margin-top:3px}
+#hpFill{width:100%;height:100%;background:#2ecc71;transition:width 0.2s}
+#viewport{position:fixed;inset:0;overflow:hidden;background:#1a252f;touch-action:none}
+#map{position:absolute;width:220%;height:180%;left:-60%;top:-40%;background:linear-gradient(180deg,#1e3c72 0%,#2a5298 35%,#4a3b2c 36%,#2c2219 100%);transition:transform 0.15s ease-out}
+.tower{position:absolute;background:#2c3e50;border:2px solid #111;box-shadow:inset 0 0 15px #000}
+#t1{left:22%;top:22%;width:90px;height:140px}#t2{left:52%;top:18%;width:120px;height:170px}#t3{left:76%;top:25%;width:85px;height:130px}
+.enemy{position:absolute;width:36px;height:56px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}
+.tag{font-size:9px;background:#e74c3c;color:#fff;padding:1px 4px;border-radius:3px;margin-bottom:2px;font-weight:bold}
+.head{width:18px;height:18px;background:#f1c40f;border-radius:50%;border:2px solid #000}
+.body{width:28px;height:34px;background:#c0392b;border-radius:6px 6px 2px 2px;border:2px solid #000;margin-top:-2px}
+#scopeMask{position:fixed;inset:0;pointer-events:none;z-index:20;display:none;background:radial-gradient(circle,transparent 30%,rgba(0,0,0,0.96) 33%)}
+#cross{position:fixed;top:50%;left:50%;width:160px;height:160px;transform:translate(-50%,-50%);pointer-events:none;z-index:21}
+#cross::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:#e74c3c}
+#cross::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:#e74c3c}
+#centerDot{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#2ecc71;border-radius:50%;transform:translate(-50%,-50%)}
+#fireBtn{position:fixed;bottom:25px;right:22px;width:76px;height:76px;border-radius:50%;background:radial-gradient(#e74c3c,#922b21);border:4px solid #fff;color:#fff;font-weight:900;font-size:15px;z-index:28;box-shadow:0 0 15px #e74c3c}
+#zoomBtn{position:fixed;bottom:25px;left:22px;width:68px;height:68px;border-radius:50%;background:#f1c40f;border:3px solid #000;color:#000;font-weight:900;font-size:13px;z-index:28}
+#killMsg{position:fixed;top:22%;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:#f1c40f;text-shadow:2px 2px 4px #000;z-index:35;pointer-events:none}
+#dmgFlash{position:fixed;inset:0;background:rgba(231,76,60,0.45);pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:29}
+.ov{position:fixed;inset:0;background:rgba(9,12,16,0.96);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;z-index:99}
+.btn{background:linear-gradient(45deg,#f39c12,#d35400);color:#fff;border:none;padding:14px 24px;font-size:16px;font-weight:900;border-radius:8px;margin:6px;width:270px}
+</style>
+</head>
+<body>
+<div id="hud">
+<div class="b"><div class="l">LEVEL</div><div class="v" id="lv">1</div></div>
+<div class="b"><div class="l">KILLS</div><div class="v" id="kl">0 / 3</div></div>
+<div class="b"><div class="l">COINS</div><div class="v" id="cn">0</div></div>
+<div class="b"><div class="l">HEALTH</div><div id="hpBar"><div id="hpFill"></div></div></div>
+</div>
+
+<div id="viewport">
+<div id="map">
+<div class="tower" id="t1"></div>
+<div class="tower" id="t2"></div>
+<div class="tower" id="t3"></div>
+</div>
+</div>
+
+<div id="scopeMask"></div>
+<div id="cross"><div id="centerDot"></div></div>
+<div id="dmgFlash"></div>
+<div id="killMsg"></div>
+
+<button id="zoomBtn" onclick="toggleZoom()">🔭 8X</button>
+<button id="fireBtn" onclick="shoot()">🔥 FIRE</button>
+
+<div id="s1" class="ov">
+<h1 style="color:#f1c40f;font-size:26px;margin-bottom:8px">🎯 SNIPER 3D: ELITE STRIKE</h1>
+<p style="color:#ccc;font-size:13px;margin-bottom:14px;max-width:300px">1. Screen par <b>Ungli Ghumakar (Drag)</b> dushman ko beech ke <b>Green Dot</b> par layein.<br>2. <b>8X Scope</b> lagayein aur <b>FIRE</b> button dabayein!</p>
+<button class="btn" onclick="startLv(1)">▶ START MISSION (LEVEL 1)</button>
+<button class="btn" style="background:#27ae60" onclick="buyGun()">🔫 UPGRADE AWM (100 COINS)</button>
+<p id="gunInfo" style="font-size:12px;color:#f1c40f;margin-top:8px">Current Gun: Kar98k (1x Damage)</p>
+</div>
+
+<div id="s2" class="ov" style="display:none">
+<h1 id="endT" style="color:#f1c40f;font-size:28px">MISSION CLEARED!</h1>
+<p id="endM" style="font-size:16px;margin:14px 0;color:#fff">+150 Coins Earned!</p>
+<button id="nxtB" class="btn" onclick="startLv(lv+1)">➡️ NEXT LEVEL</button>
+<button class="btn" style="background:#7f8c8d" onclick="startLv(lv)">🔄 RETRY</button>
+<button class="btn" style="background:#2980b9" onclick="backMenu()">🏠 GUN SHOP & MENU</button>
+</div>
+
+<script>
+var lv=1,kills=0,need=3,coins=0,hp=100,gunDmg=1,zoom=false,mx=-30,my=-20,sx=0,sy=0,tSpawn,tEnemyFire,ac=null;
+var vp=document.getElementById('viewport'),mp=document.getElementById('map');
+
+vp.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;});
+vp.addEventListener('touchmove',function(e){
+var dx=(e.touches[0].clientX-sx)*(zoom?0.12:0.25);
+var dy=(e.touches[0].clientY-sy)*(zoom?0.12:0.25);
+sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+mx=Math.max(-60,Math.min(0,mx+dx));
+my=Math.max(-45,Math.min(0,my+dy));
+updMap();
+});
+function updMap(){mp.style.left=mx+'%';mp.style.top=my+'%';mp.style.transform=zoom?'scale(1.8)':'scale(1)';}
+function toggleZoom(){
+zoom=!zoom;
+document.getElementById('scopeMask').style.display=zoom?'block':'none';
+document.getElementById('zoomBtn').innerText=zoom?'❌ EXIT':'🔭 8X';
+updMap();
+}
+function snd(f1,f2){
+try{
+if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();
+if(ac.state==='suspended')ac.resume();
+var o=ac.createOscillator(),g=ac.createGain();
+o.type='sawtooth';o.frequency.setValueAtTime(f1,ac.currentTime);
+o.frequency.exponentialRampToValueAtTime(f2,ac.currentTime+0.18);
+g.gain.setValueAtTime(0.4,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.18);
+o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.18);
+}catch(e){}
+}
+function msg(t,c){
+var el=document.getElementById('killMsg');el.innerText=t;el.style.color=c;
+setTimeout(function(){el.innerText='';},900);
+}
+function shoot(){
+snd(160,25);
+var cx=window.innerWidth/2,cy=window.innerHeight/2,hit=false;
+document.querySelectorAll('.enemy').forEach(function(en){
+if(hit)return;
+var hr=en.querySelector('.head').getBoundingClientRect();
+var br=en.querySelector('.body').getBoundingClientRect();
+if(cx>=hr.left-12 && cx<=hr.right+12 && cy>=hr.top-12 && cy<=hr.bottom+12){
+hit=true;en.remove();kills++;coins+=50*gunDmg;snd(900,100);msg('🎯 HEADSHOT! +50 COINS','#f1c40f');
+}else if(cx>=br.left-10 && cx<=br.right+10 && cy>=br.top-10 && cy<=br.bottom+10){
+hit=true;en.remove();kills++;coins+=25*gunDmg;msg('💥 ENEMY KILLED! +25 COINS','#2ecc71');
+}
+});
+if(!hit)msg('MISSED! AIM AT CENTER DOT','#e74c3c');
+updHud();
+if(kills>=need)endGame(true);
+}
+function updHud(){
+document.getElementById('lv').innerText=lv;
+document.getElementById('kl').innerText=kills+' / '+need;
+document.getElementById('cn').innerText=coins;
+document.getElementById('hpFill').style.width=hp+'%';
+}
+function startLv(l){
+lv=l;kills=0;need=2+l;hp=100;mx=-30;my=-20;updMap();updHud();
+document.getElementById('s1').style.display='none';
+document.getElementById('s2').style.display='none';
+document.querySelectorAll('.enemy').forEach(function(e){e.remove();});
+clearInterval(tSpawn);clearInterval(tEnemyFire);
+tSpawn=setInterval(spawnEn,2200);spawnEn();
+tEnemyFire=setInterval(function(){
+if(document.querySelectorAll('.enemy').length>0){
+hp-=10+lv*2;updHud();
+var df=document.getElementById('dmgFlash');df.style.opacity=1;setTimeout(function(){df.style.opacity=0;},180);
+if(hp<=0)endGame(false);
+}
+},3500);
+}
+function spawnEn(){
+if(document.querySelectorAll('.enemy').length>=3)return;
+var spots=[{x:26,y:26,d:'250m'},{x:58,y:22,d:'320m'},{x:80,y:29,d:'210m'},{x:40,y:45,d:'140m'},{x:68,y:48,d:'120m'}];
+var s=spots[Math.floor(Math.random()*spots.length)];
+var e=document.createElement('div'),tg=document.createElement('div'),hd=document.createElement('div'),bd=document.createElement('div');
+e.className='enemy';tg.className='tag';tg.innerText='SNIPER '+s.d;hd.className='head';bd.className='body';
+e.style.left=s.x+'%';e.style.top=s.y+'%';
+e.appendChild(tg);e.appendChild(hd);e.appendChild(bd);mp.appendChild(e);
+}
+function endGame(win){
+clearInterval(tSpawn);clearInterval(tEnemyFire);
+if(zoom)toggleZoom();
+document.getElementById('endT').innerText=win?'🏆 LEVEL '+lv+' CLEARED!':'💀 YOU WERE SHOT!';
+document.getElementById('endT').style.color=win?'#2ecc71':'#e74c3c';
+document.getElementById('endM').innerText=win?'Total Coins: '+coins:'Enemy snipers took you down!';
+document.getElementById('nxtB').style.display=win?'inline-block':'none';
+document.getElementById('s2').style.display='flex';
+}
+function backMenu(){
+document.getElementById('s2').style.display='none';
+document.getElementById('s1').style.display='flex';
+}
+function buyGun(){
+if(coins>=100 && gunDmg===1){coins-=100;gunDmg=2;document.getElementById('gunInfo').innerText='Current Gun: AWM Gold (2x Coins & Power!)';alert('AWM Sniper Unlocked!');}
+else if(gunDmg===2)alert('AWM pehle se unlocked hai!');
+else alert('100 Coins chahiye! Pehle Level 1 jeetein.');
+}
+</script>
+</body>
+</html>
+
+document.getElementById('s2').style.display='none';
+document.getElementById('s1').style.display='flex';
+}
+function buyGun(){
+if(coins>=100 && gunDmg===1){coins-=100;gunDmg=2;document.getElementById('gunInfo').innerText='Current Gun: AWM Gold (2x Coins & Power!)';alert('AWM Sniper Unlocked!');}
+else if(gunDmg===2)alert('AWM pehle se unlocked hai!');
+else alert('100 Coins chahiye! Pehle Level 1 jeetein.');
 }
 </script>
 </body>
