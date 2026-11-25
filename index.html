@@ -3,145 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>PUBG Sniper Training Room</title>
+<title>3D Sniper Mission</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none}
-body{background:#1a1d20;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-#hud{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,18,22,0.92);border-bottom:2px solid #f1c40f;z-index:30}
-.v{font-size:19px;font-weight:900;color:#f1c40f;text-align:center}
-.l{font-size:10px;color:#bdc3c7;text-align:center;letter-spacing:1px}
-#range{position:relative;flex:1;width:100%;overflow:hidden;background:linear-gradient(180deg,#5d8aa8 0%,#a9cce3 38%,#8d6e63 39%,#5d4037 52%,#4e342e 100%);transition:transform 0.25s ease}
-.zoom8x{transform:scale(1.6)}
-#wall{position:absolute;top:38%;left:0;right:0;height:14%;background:repeating-linear-gradient(90deg,#7f8c8d 0 48px,#2c3e50 48px 50px);border-top:4px solid #f1c40f;border-bottom:4px solid #111}
-#floor{position:absolute;top:52%;inset:52% 0 0 0;background:repeating-linear-gradient(90deg,rgba(0,0,0,0.2) 0 2px,transparent 2px 60px),repeating-linear-gradient(0deg,rgba(255,255,255,0.06) 0 2px,transparent 2px 35px)}
-#scopeOverlay{position:fixed;inset:0;pointer-events:none;z-index:20;display:none;background:radial-gradient(circle,transparent 34%,#000 36%)}
-#scopeLines{position:fixed;top:50%;left:50%;width:220px;height:220px;transform:translate(-50%,-50%);pointer-events:none;z-index:21}
-#scopeLines::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(231,76,60,0.8)}
-#scopeLines::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(231,76,60,0.8)}
-#dot{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#e74c3c;border-radius:50%;transform:translate(-50%,-50%)}
-#awm{position:fixed;bottom:-15px;right:8%;width:120px;height:170px;background:linear-gradient(90deg,#1e3f20,#2e7d32,#142815);border-radius:10px 10px 0 0;transform:rotate(-15deg);transition:transform 0.08s;pointer-events:none;z-index:18;border:2px solid #000}
-#awm::before{content:'AWM';position:absolute;top:35px;left:35px;font-size:12px;font-weight:bold;color:#f1c40f}
-#awm::after{content:'';position:absolute;top:-45px;left:48px;width:18px;height:50px;background:#111;border-radius:3px}
-#flash{position:absolute;top:-85px;left:22px;width:70px;height:70px;background:radial-gradient(#fff,#f1c40f,#e67e22,transparent 70%);border-radius:50%;opacity:0}
-.kick{transform:rotate(-15deg) translateY(28px) scale(0.94)!important}
-.dummy{position:absolute;width:64px;height:96px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;animation:strafe 1.8s infinite alternate ease-in-out}
-@keyframes strafe{0%{margin-left:-32px}100%{margin-left:32px}}
-.helmet{width:34px;height:30px;background:#2c3e50;border-radius:16px 16px 6px 6px;border:2px solid #f1c40f;position:relative;z-index:2;display:flex;justify-content:center;align-items:center}
-.helmet::after{content:'LV3';font-size:8px;font-weight:bold;color:#f1c40f}
-.vest{width:50px;height:54px;background:linear-gradient(#d35400,#a04000);border-radius:8px;border:2px solid #111;margin-top:-2px;display:flex;justify-content:center;align-items:center;font-size:10px;font-weight:bold}
-.stand{width:10px;height:14px;background:#7f8c8d}
-.ft{position:absolute;font-weight:900;font-size:18px;pointer-events:none;animation:pop 0.75s forwards;text-shadow:2px 2px 3px #000;z-index:25}
-@keyframes pop{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-135%)}}
-#scopeBtn{position:fixed;bottom:22px;left:20px;width:68px;height:68px;border-radius:50%;background:rgba(241,196,15,0.95);border:3px solid #111;color:#111;font-weight:900;font-size:14px;z-index:28;box-shadow:0 4px 12px #000}
-.ov{position:fixed;inset:0;background:rgba(12,15,20,0.95);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;z-index:99}
-.btn{background:linear-gradient(45deg,#f1c40f,#d35400);color:#111;border:none;padding:15px 28px;font-size:18px;font-weight:900;border-radius:8px;margin:8px;width:260px}
+body{background:#0b0e14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(10,12,16,0.95);border-bottom:2px solid #f1c40f;z-index:30}
+.box{text-align:center}
+.l{font-size:9px;color:#aaa;letter-spacing:1px}
+.v{font-size:16px;font-weight:900;color:#f1c40f}
+#world{position:relative;flex:1;width:100%;overflow:hidden;perspective:600px;background:linear-gradient(180deg,#1b263b 0%,#415a77 36%,#5c4d3c 37%,#3e3124 65%,#2b2118 100%);transition:transform 0.25s}
+.zoomed{transform:scale(1.85)}
+#road{position:absolute;top:37%;left:50%;width:180%;height:65%;transform:translateX(-50%) rotateX(72deg);transform-origin:top;background:repeating-linear-gradient(0deg,rgba(255,255,255,0.08) 0 4px,transparent 4px 50px),repeating-linear-gradient(90deg,rgba(0,0,0,0.3) 0 4px,transparent 4px 80px)}
+#bunker1,#bunker2{position:absolute;top:33%;width:90px;height:45px;background:#34495e;border:2px solid #111;border-radius:4px}
+#bunker1{left:12%}#bunker2{right:14%}
+.enemy{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:left 0.6s linear}
+.dist{font-size:9px;background:rgba(0,0,0,0.75);color:#2ecc71;padding:1px 5px;border-radius:4px;margin-bottom:2px;font-weight:bold}
+.hd{width:28px;height:26px;background:#e74c3c;border-radius:50%;border:2px solid #f1c40f;box-shadow:0 0 6px #f1c40f}
+.bd{width:44px;height:52px;background:linear-gradient(#2c3e50,#1a252f);border-radius:10px 10px 3px 3px;border:2px solid #000;margin-top:-2px}
+#scope{position:fixed;inset:0;pointer-events:none;z-index:20;display:none;background:radial-gradient(circle,transparent 32%,#000 35%)}
+#aim{position:fixed;top:50%;left:50%;width:180px;height:180px;transform:translate(-50%,-50%);pointer-events:none;z-index:21}
+#aim::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(231,76,60,0.8)}
+#aim::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(231,76,60,0.8)}
+#dot{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#f1c40f;border-radius:50%;transform:translate(-50%,-50%)}
+#rifle{position:fixed;bottom:-15px;right:6%;width:110px;height:165px;background:linear-gradient(90deg,#1c2833,#34495e,#111);border-radius:10px 10px 0 0;transform:rotate(-14deg);transition:transform 0.08s;pointer-events:none;z-index:18;border:2px solid #000}
+#rifle::before{content:'8X AWM';position:absolute;top:35px;left:28px;font-size:11px;font-weight:bold;color:#f1c40f}
+#rifle::after{content:'';position:absolute;top:-45px;left:45px;width:16px;height:50px;background:#000}
+#flash{position:absolute;top:-80px;left:20px;width:65px;height:65px;background:radial-gradient(#fff,#f1c40f,#e67e22,transparent 70%);border-radius:50%;opacity:0}
+.recoil{transform:rotate(-14deg) translateY(25px) scale(0.95)!important}
+#scBtn{position:fixed;bottom:20px;left:18px;width:66px;height:66px;border-radius:50%;background:#f1c40f;border:3px solid #000;color:#000;font-weight:900;font-size:13px;z-index:28}
+.ft{position:absolute;font-weight:900;font-size:17px;pointer-events:none;animation:up 0.75s forwards;text-shadow:2px 2px 3px #000;z-index:25}
+@keyframes up{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-135%)}}
+.ov{position:fixed;inset:0;background:rgba(10,12,18,0.96);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;z-index:99}
+.btn{background:linear-gradient(45deg,#f1c40f,#e67e22);color:#000;border:none;padding:14px 26px;font-size:17px;font-weight:900;border-radius:8px;margin:7px;width:260px}
 </style>
 </head>
 <body>
 <div id="hud">
-<div><div class="l">DAMAGE SCORE</div><div class="v" id="sc">0</div></div>
-<div><div class="l">LV3 HEADSHOTS</div><div class="v" id="hs">0</div></div>
-<div><div class="l">TIMER</div><div class="v" id="tm">30s</div></div>
+<div class="box"><div class="l">LEVEL</div><div class="v" id="lv">1</div></div>
+<div class="box"><div class="l">SCORE / TARGET</div><div class="v" id="sc">0 / 500</div></div>
+<div class="box"><div class="l">AMMO</div><div class="v" id="am">10</div></div>
+<div class="box"><div class="l">TIME</div><div class="v" id="tm">35s</div></div>
 </div>
 
-<div id="range" onclick="shoot(event)">
-<div id="wall"></div>
-<div id="floor"></div>
+<div id="world" onclick="missShot()">
+<div id="road"></div>
+<div id="bunker1"></div>
+<div id="bunker2"></div>
 </div>
 
-<div id="scopeOverlay"></div>
-<div id="scopeLines"><div id="dot"></div></div>
-<div id="awm"><div id="flash"></div></div>
-<button id="scopeBtn" onclick="toggle8x()">🔭 8X</button>
+<div id="scope"></div>
+<div id="aim"><div id="dot"></div></div>
+<div id="rifle"><div id="flash"></div></div>
+<button id="scBtn" onclick="toggleZoom()">🔭 8X</button>
 
 <div id="s1" class="ov">
-<h1 style="color:#f1c40f;font-size:26px;margin-bottom:8px">🎯 SNIPER TRAINING ROOM</h1>
-<p style="color:#ccc;margin-bottom:20px;max-width:300px">AWM Sniper se dummy targets ke <b>LV3 Helmet (Head)</b> par shoot karke <b>+150 Headshot</b> maarein!</p>
-<button class="btn" onclick="startRange(1)">🔫 ENTER TRAINING ROOM</button>
-<button class="btn" style="background:#2ecc71;color:#000" onclick="startRange(2)">⚡ AWM MAGNUM (2X DMG)</button>
+<h1 style="color:#f1c40f;font-size:26px;margin-bottom:8px">🎯 3D SNIPER MISSIONS</h1>
+<p style="color:#ccc;margin-bottom:16px;max-width:300px">Door (150m–350m) khade dushmano par <b>8X Scope</b> lagakar <b>Headshot (+200)</b> maarein aur agle Level mein jayein!</p>
+<button class="btn" onclick="startLv(1)">🔥 LEVEL 1: BASE CAMP</button>
+<button class="btn" style="background:#2ecc71" onclick="startLv(2)">⚡ LEVEL 2: LONG RANGE</button>
+<button class="btn" style="background:#e74c3c;color:#fff" onclick="startLv(3)">💀 LEVEL 3: ELITE SNIPER</button>
 </div>
 
 <div id="s2" class="ov" style="display:none">
-<h1 style="color:#f1c40f;font-size:28px">WINNER WINNER!</h1>
-<p style="font-size:20px;margin:12px 0">Total Damage: <b id="fs" style="color:#f1c40f">0</b></p>
-<p style="font-size:16px;margin-bottom:18px">LV3 Headshots: <b id="fhs" style="color:#2ecc71">0</b></p>
-<button class="btn" onclick="startRange(1)">🔄 TRAIN AGAIN</button>
-<button class="btn" style="background:#2ecc71;color:#000" onclick="startRange(2)">⚡ AWM MAGNUM (2X)</button>
+<h1 id="resTitle" style="color:#f1c40f;font-size:28px">MISSION COMPLETE!</h1>
+<p id="resMsg" style="font-size:18px;margin:14px 0;color:#fff">Score: 0</p>
+<button id="nextBtn" class="btn" onclick="nextLevel()">➡️ NEXT LEVEL</button>
+<button class="btn" style="background:#7f8c8d;color:#fff" onclick="startLv(curLv)">🔄 RETRY LEVEL</button>
 </div>
 
 <script>
-var sc=0,hs=0,tm=30,dmg=1,t1,t2,ac=null,scoped=false;
-function awmSound(head){
+var curLv=1,sc=0,goal=500,ammo=10,tm=35,t1,t2,t3,ac=null,zoom=false;
+var levels=[
+{g:500,a:12,t:35,sp:1100,mv:false},
+{g:900,a:14,t:35,sp:950,mv:true},
+{g:1400,a:16,t:40,sp:850,mv:true},
+{g:2000,a:18,t:40,sp:750,mv:true},
+{g:2800,a:20,t:45,sp:650,mv:true}
+];
+function snd(h){
 try{
 if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();
 if(ac.state==='suspended')ac.resume();
 var o=ac.createOscillator(),g=ac.createGain();
-o.type=head?'triangle':'sawtooth';
-o.frequency.setValueAtTime(head?900:140,ac.currentTime);
-o.frequency.exponentialRampToValueAtTime(25,ac.currentTime+0.18);
+o.type=h?'triangle':'sawtooth';
+o.frequency.setValueAtTime(h?950:130,ac.currentTime);
+o.frequency.exponentialRampToValueAtTime(20,ac.currentTime+0.18);
 g.gain.setValueAtTime(0.4,ac.currentTime);
 g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.18);
 o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.18);
 }catch(e){}
 }
-function shoot(e){
-var g=document.getElementById('awm'),f=document.getElementById('flash');
-g.classList.add('kick');f.style.opacity=1;
-setTimeout(function(){g.classList.remove('kick');f.style.opacity=0;},90);
-awmSound(false);
+function fireAnim(h){
+var r=document.getElementById('rifle'),f=document.getElementById('flash');
+r.classList.add('recoil');f.style.opacity=1;
+setTimeout(function(){r.classList.remove('recoil');f.style.opacity=0;},85);
+snd(h);
 }
-function toggle8x(){
-scoped=!scoped;
-document.getElementById('range').classList.toggle('zoom8x',scoped);
-document.getElementById('scopeOverlay').style.display=scoped?'block':'none';
-document.getElementById('awm').style.display=scoped?'none':'block';
-document.getElementById('scopeBtn').innerText=scoped?'❌ EXIT':'🔭 8X';
+function toggleZoom(){
+zoom=!zoom;
+document.getElementById('world').classList.toggle('zoomed',zoom);
+document.getElementById('scope').style.display=zoom?'block':'none';
+document.getElementById('rifle').style.display=zoom?'none':'block';
+document.getElementById('scBtn').innerText=zoom?'❌ EXIT':'🔭 8X';
 }
-function startRange(mode){
-dmg=mode;sc=0;hs=0;tm=30;
-document.getElementById('sc').innerText=0;
-document.getElementById('hs').innerText=0;
-document.getElementById('tm').innerText='30s';
+function missShot(){
+if(ammo<=0)return;
+ammo--;fireAnim(false);updHud();
+if(ammo<=0 && sc<goal)endLv(false);
+}
+function updHud(){
+document.getElementById('lv').innerText=curLv;
+document.getElementById('sc').innerText=sc+' / '+goal;
+document.getElementById('am').innerText=ammo;
+document.getElementById('tm').innerText=tm+'s';
+}
+function startLv(lv){
+curLv=lv;
+var cfg=levels[Math.min(lv-1,levels.length-1)];
+sc=0;goal=cfg.g;ammo=cfg.a;tm=cfg.t;
+updHud();
 document.getElementById('s1').style.display='none';
 document.getElementById('s2').style.display='none';
-clearInterval(t1);clearInterval(t2);
+clearInterval(t1);clearInterval(t2);clearInterval(t3);
 t1=setInterval(function(){
-tm--;document.getElementById('tm').innerText=tm+'s';
-if(tm<=0){
-clearInterval(t1);clearInterval(t2);
-if(scoped)toggle8x();
-document.querySelectorAll('.dummy').forEach(function(el){el.remove();});
-document.getElementById('fs').innerText=sc;
-document.getElementById('fhs').innerText=hs;
-document.getElementById('s2').style.display='flex';
-}
+tm--;updHud();
+if(tm<=0)endLv(sc>=goal);
 },1000);
-t2=setInterval(spawnDummy,800);spawnDummy();
+t2=setInterval(function(){spawnEnemy(cfg.mv);},cfg.sp);
+spawnEnemy(cfg.mv);
 }
-function spawnDummy(){
-var r=document.getElementById('range'),d=document.createElement('div'),hm=document.createElement('div'),vs=document.createElement('div'),st=document.createElement('div');
-d.className='dummy';hm.className='helmet';vs.className='vest';vs.innerText='TARGET';st.className='stand';
-d.appendChild(hm);d.appendChild(vs);d.appendChild(st);
-var x=Math.max(55,Math.random()*(r.clientWidth-110));
-var y=Math.max(r.clientHeight*0.35,Math.random()*(r.clientHeight*0.75));
-d.style.left=x+'px';d.style.top=y+'px';
-d.onclick=function(ev){
+function nextLevel(){startLv(curLv+1);}
+function spawnEnemy(canMove){
+var w=document.getElementById('world');
+var e=document.createElement('div'),ds=document.createElement('div'),hd=document.createElement('div'),bd=document.createElement('div');
+e.className='enemy';ds.className='dist';hd.className='hd';bd.className='bd';
+var depth=Math.random();
+var scale=0.45+(depth*0.65);
+var distM=Math.round(350-(depth*250));
+ds.innerText=distM+'m';
+e.style.transform='translate(-50%,-50%) scale('+scale.toFixed(2)+')';
+var x=15+Math.random()*70;
+var y=37+(depth*32);
+e.style.left=x+'%';e.style.top=y+'%';
+e.appendChild(ds);e.appendChild(hd);e.appendChild(bd);
+if(canMove){
+setTimeout(function(){if(e.parentNode)e.style.left=Math.max(12,Math.min(88,x+(Math.random()>0.5?18:-18)))+'%';},200);
+}
+e.onclick=function(ev){
 ev.stopPropagation();
-shoot();
-var isH=ev.target.className==='helmet';
-var pts=(isH?150:50)*dmg;
-sc+=pts;if(isH){hs++;awmSound(true);}
-document.getElementById('sc').innerText=sc;
-document.getElementById('hs').innerText=hs;
+if(ammo<=0)return;
+ammo--;
+var isH=ev.target.className==='hd';
+fireAnim(isH);
+var pts=isH?(distM>220?250:200):80;
+sc+=pts;updHud();
 var ft=document.createElement('div');ft.className='ft';
-ft.style.left=x+'px';ft.style.top=y+'px';
+ft.style.left=e.style.left;ft.style.top=e.style.top;
 ft.style.color=isH?'#f1c40f':'#2ecc71';
-ft.innerText=isH?'LV3 HEADSHOT! +'+pts:'HIT +'+pts;
-r.appendChild(ft);setTimeout(function(){ft.remove();},750);
-d.remove();
+ft.innerText=isH?'SNIPER HEADSHOT ('+distM+'m)! +'+pts:'KILL +'+pts;
+w.appendChild(ft);setTimeout(function(){ft.remove();},750);
+e.remove();
+if(sc>=goal)endLv(true);
+else if(ammo<=0)endLv(false);
 };
-r.appendChild(d);
-setTimeout(function(){if(d.parentNode)d.remove();},1900);
+w.appendChild(e);
+setTimeout(function(){if(e.parentNode)e.remove();},2200);
+}
+function endLv(win){
+clearInterval(t1);clearInterval(t2);
+if(zoom)toggleZoom();
+document.querySelectorAll('.enemy').forEach(function(el){el.remove();});
+document.getElementById('resTitle').innerText=win?'🏆 LEVEL '+curLv+' CLEARED!':'💀 OUT OF AMMO / TIME!';
+document.getElementById('resTitle').style.color=win?'#2ecc71':'#e74c3c';
+document.getElementById('resMsg').innerText='Score: '+sc+' / Target: '+goal;
+document.getElementById('nextBtn').style.display=win?'inline-block':'none';
+document.getElementById('s2').style.display='flex';
 }
 </script>
 </body>
