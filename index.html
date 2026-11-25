@@ -3,71 +3,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Sharpshooter Arena</title>
+<title>PUBG Sniper Training Room</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none}
-body{background:#0b0e14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-#hud{display:flex;justify-content:space-around;padding:14px;background:#151a24;border-bottom:2px solid #f39c12}
-.v{font-size:22px;font-weight:bold;color:#f39c12;text-align:center}
-.l{font-size:11px;color:#aaa;text-align:center}
-#arena{position:relative;flex:1;width:100%;overflow:hidden}
-.t{position:absolute;width:74px;height:74px;border-radius:50%;background:radial-gradient(#e74c3c 25%,#fff 26%,#fff 50%,#c0392b 51%);display:flex;justify-content:center;align-items:center;transform:translate(-50%,-50%)}
-.h{width:26px;height:26px;border-radius:50%;background:#f1c40f;border:2px solid #000}
-.ov{position:fixed;inset:0;background:rgba(11,14,20,0.95);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;z-index:99}
-.btn{background:#f39c12;color:#fff;border:none;padding:16px 30px;font-size:18px;font-weight:bold;border-radius:10px;margin:10px;width:250px}
-.gold{background:#f1c40f;color:#000}
+body{background:#1a1d20;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#hud{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,18,22,0.92);border-bottom:2px solid #f1c40f;z-index:30}
+.v{font-size:19px;font-weight:900;color:#f1c40f;text-align:center}
+.l{font-size:10px;color:#bdc3c7;text-align:center;letter-spacing:1px}
+#range{position:relative;flex:1;width:100%;overflow:hidden;background:linear-gradient(180deg,#5d8aa8 0%,#a9cce3 38%,#8d6e63 39%,#5d4037 52%,#4e342e 100%);transition:transform 0.25s ease}
+.zoom8x{transform:scale(1.6)}
+#wall{position:absolute;top:38%;left:0;right:0;height:14%;background:repeating-linear-gradient(90deg,#7f8c8d 0 48px,#2c3e50 48px 50px);border-top:4px solid #f1c40f;border-bottom:4px solid #111}
+#floor{position:absolute;top:52%;inset:52% 0 0 0;background:repeating-linear-gradient(90deg,rgba(0,0,0,0.2) 0 2px,transparent 2px 60px),repeating-linear-gradient(0deg,rgba(255,255,255,0.06) 0 2px,transparent 2px 35px)}
+#scopeOverlay{position:fixed;inset:0;pointer-events:none;z-index:20;display:none;background:radial-gradient(circle,transparent 34%,#000 36%)}
+#scopeLines{position:fixed;top:50%;left:50%;width:220px;height:220px;transform:translate(-50%,-50%);pointer-events:none;z-index:21}
+#scopeLines::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(231,76,60,0.8)}
+#scopeLines::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(231,76,60,0.8)}
+#dot{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#e74c3c;border-radius:50%;transform:translate(-50%,-50%)}
+#awm{position:fixed;bottom:-15px;right:8%;width:120px;height:170px;background:linear-gradient(90deg,#1e3f20,#2e7d32,#142815);border-radius:10px 10px 0 0;transform:rotate(-15deg);transition:transform 0.08s;pointer-events:none;z-index:18;border:2px solid #000}
+#awm::before{content:'AWM';position:absolute;top:35px;left:35px;font-size:12px;font-weight:bold;color:#f1c40f}
+#awm::after{content:'';position:absolute;top:-45px;left:48px;width:18px;height:50px;background:#111;border-radius:3px}
+#flash{position:absolute;top:-85px;left:22px;width:70px;height:70px;background:radial-gradient(#fff,#f1c40f,#e67e22,transparent 70%);border-radius:50%;opacity:0}
+.kick{transform:rotate(-15deg) translateY(28px) scale(0.94)!important}
+.dummy{position:absolute;width:64px;height:96px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;animation:strafe 1.8s infinite alternate ease-in-out}
+@keyframes strafe{0%{margin-left:-32px}100%{margin-left:32px}}
+.helmet{width:34px;height:30px;background:#2c3e50;border-radius:16px 16px 6px 6px;border:2px solid #f1c40f;position:relative;z-index:2;display:flex;justify-content:center;align-items:center}
+.helmet::after{content:'LV3';font-size:8px;font-weight:bold;color:#f1c40f}
+.vest{width:50px;height:54px;background:linear-gradient(#d35400,#a04000);border-radius:8px;border:2px solid #111;margin-top:-2px;display:flex;justify-content:center;align-items:center;font-size:10px;font-weight:bold}
+.stand{width:10px;height:14px;background:#7f8c8d}
+.ft{position:absolute;font-weight:900;font-size:18px;pointer-events:none;animation:pop 0.75s forwards;text-shadow:2px 2px 3px #000;z-index:25}
+@keyframes pop{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-135%)}}
+#scopeBtn{position:fixed;bottom:22px;left:20px;width:68px;height:68px;border-radius:50%;background:rgba(241,196,15,0.95);border:3px solid #111;color:#111;font-weight:900;font-size:14px;z-index:28;box-shadow:0 4px 12px #000}
+.ov{position:fixed;inset:0;background:rgba(12,15,20,0.95);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;z-index:99}
+.btn{background:linear-gradient(45deg,#f1c40f,#d35400);color:#111;border:none;padding:15px 28px;font-size:18px;font-weight:900;border-radius:8px;margin:8px;width:260px}
 </style>
 </head>
 <body>
 <div id="hud">
-<div><div class="l">SCORE</div><div class="v" id="sc">0</div></div>
-<div><div class="l">TIME</div><div class="v" id="tm">30s</div></div>
+<div><div class="l">DAMAGE SCORE</div><div class="v" id="sc">0</div></div>
+<div><div class="l">LV3 HEADSHOTS</div><div class="v" id="hs">0</div></div>
+<div><div class="l">TIMER</div><div class="v" id="tm">30s</div></div>
 </div>
-<div id="arena"></div>
+
+<div id="range" onclick="shoot(event)">
+<div id="wall"></div>
+<div id="floor"></div>
+</div>
+
+<div id="scopeOverlay"></div>
+<div id="scopeLines"><div id="dot"></div></div>
+<div id="awm"><div id="flash"></div></div>
+<button id="scopeBtn" onclick="toggle8x()">🔭 8X</button>
 
 <div id="s1" class="ov">
-<h1 style="color:#f39c12;margin-bottom:10px">🎯 SHARPSHOOTER</h1>
-<p style="color:#ccc;margin-bottom:20px">Yellow center par tap karke HEADSHOT (100 pts) maarein!</p>
-<button class="btn" onclick="go(1)">🔥 Start Free Match</button>
-<button class="btn gold" onclick="go(2)">⚡ Golden Gun (2x)</button>
+<h1 style="color:#f1c40f;font-size:26px;margin-bottom:8px">🎯 SNIPER TRAINING ROOM</h1>
+<p style="color:#ccc;margin-bottom:20px;max-width:300px">AWM Sniper se dummy targets ke <b>LV3 Helmet (Head)</b> par shoot karke <b>+150 Headshot</b> maarein!</p>
+<button class="btn" onclick="startRange(1)">🔫 ENTER TRAINING ROOM</button>
+<button class="btn" style="background:#2ecc71;color:#000" onclick="startRange(2)">⚡ AWM MAGNUM (2X DMG)</button>
 </div>
 
 <div id="s2" class="ov" style="display:none">
-<h1 style="color:#f39c12">MATCH OVER!</h1>
-<p style="font-size:22px;margin:15px 0">Score: <b id="fs" style="color:#f39c12">0</b></p>
-<button class="btn" onclick="go(1)">🔄 Play Again</button>
-<button class="btn gold" onclick="go(2)">⚡ Golden Gun (2x)</button>
+<h1 style="color:#f1c40f;font-size:28px">WINNER WINNER!</h1>
+<p style="font-size:20px;margin:12px 0">Total Damage: <b id="fs" style="color:#f1c40f">0</b></p>
+<p style="font-size:16px;margin-bottom:18px">LV3 Headshots: <b id="fhs" style="color:#2ecc71">0</b></p>
+<button class="btn" onclick="startRange(1)">🔄 TRAIN AGAIN</button>
+<button class="btn" style="background:#2ecc71;color:#000" onclick="startRange(2)">⚡ AWM MAGNUM (2X)</button>
 </div>
 
 <script>
-var sc=0,tm=30,m=1,t1,t2;
-function go(mode){
-m=mode;sc=0;tm=30;
+var sc=0,hs=0,tm=30,dmg=1,t1,t2,ac=null,scoped=false;
+function awmSound(head){
+try{
+if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();
+if(ac.state==='suspended')ac.resume();
+var o=ac.createOscillator(),g=ac.createGain();
+o.type=head?'triangle':'sawtooth';
+o.frequency.setValueAtTime(head?900:140,ac.currentTime);
+o.frequency.exponentialRampToValueAtTime(25,ac.currentTime+0.18);
+g.gain.setValueAtTime(0.4,ac.currentTime);
+g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+0.18);
+o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.18);
+}catch(e){}
+}
+function shoot(e){
+var g=document.getElementById('awm'),f=document.getElementById('flash');
+g.classList.add('kick');f.style.opacity=1;
+setTimeout(function(){g.classList.remove('kick');f.style.opacity=0;},90);
+awmSound(false);
+}
+function toggle8x(){
+scoped=!scoped;
+document.getElementById('range').classList.toggle('zoom8x',scoped);
+document.getElementById('scopeOverlay').style.display=scoped?'block':'none';
+document.getElementById('awm').style.display=scoped?'none':'block';
+document.getElementById('scopeBtn').innerText=scoped?'❌ EXIT':'🔭 8X';
+}
+function startRange(mode){
+dmg=mode;sc=0;hs=0;tm=30;
 document.getElementById('sc').innerText=0;
+document.getElementById('hs').innerText=0;
 document.getElementById('tm').innerText='30s';
-document.getElementById('arena').innerHTML='';
 document.getElementById('s1').style.display='none';
 document.getElementById('s2').style.display='none';
 clearInterval(t1);clearInterval(t2);
 t1=setInterval(function(){
 tm--;document.getElementById('tm').innerText=tm+'s';
-if(tm<=0){clearInterval(t1);clearInterval(t2);document.getElementById('arena').innerHTML='';document.getElementById('fs').innerText=sc;document.getElementById('s2').style.display='flex';}
-},1000);
-t2=setInterval(sp,700);sp();
+if(tm<=0){
+clearInterval(t1);clearInterval(t2);
+if(scoped)toggle8x();
+document.querySelectorAll('.dummy').forEach(function(el){el.remove();});
+document.getElementById('fs').innerText=sc;
+document.getElementById('fhs').innerText=hs;
+document.getElementById('s2').style.display='flex';
 }
-function sp(){
-var a=document.getElementById('arena'),d=document.createElement('div'),b=document.createElement('div');
-d.className='t';b.className='h';d.appendChild(b);
-d.style.left=Math.max(40,Math.random()*(a.clientWidth-80))+'px';
-d.style.top=Math.max(40,Math.random()*(a.clientHeight-80))+'px';
-d.onclick=function(e){
-e.stopPropagation();
-sc+=(e.target.className==='h'?100:50)*m;
+},1000);
+t2=setInterval(spawnDummy,800);spawnDummy();
+}
+function spawnDummy(){
+var r=document.getElementById('range'),d=document.createElement('div'),hm=document.createElement('div'),vs=document.createElement('div'),st=document.createElement('div');
+d.className='dummy';hm.className='helmet';vs.className='vest';vs.innerText='TARGET';st.className='stand';
+d.appendChild(hm);d.appendChild(vs);d.appendChild(st);
+var x=Math.max(55,Math.random()*(r.clientWidth-110));
+var y=Math.max(r.clientHeight*0.35,Math.random()*(r.clientHeight*0.75));
+d.style.left=x+'px';d.style.top=y+'px';
+d.onclick=function(ev){
+ev.stopPropagation();
+shoot();
+var isH=ev.target.className==='helmet';
+var pts=(isH?150:50)*dmg;
+sc+=pts;if(isH){hs++;awmSound(true);}
 document.getElementById('sc').innerText=sc;
+document.getElementById('hs').innerText=hs;
+var ft=document.createElement('div');ft.className='ft';
+ft.style.left=x+'px';ft.style.top=y+'px';
+ft.style.color=isH?'#f1c40f':'#2ecc71';
+ft.innerText=isH?'LV3 HEADSHOT! +'+pts:'HIT +'+pts;
+r.appendChild(ft);setTimeout(function(){ft.remove();},750);
 d.remove();
 };
-a.appendChild(d);
-setTimeout(function(){if(d.parentNode)d.remove();},1400);
+r.appendChild(d);
+setTimeout(function(){if(d.parentNode)d.remove();},1900);
 }
 </script>
 </body>
